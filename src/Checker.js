@@ -1,24 +1,37 @@
 var fs = require("fs");
 var mkdirp = require('mkdirp');
 var cmd = require('node-cmd');
+var node_ssh = require('node-ssh');
+
+ssh = new node_ssh();
 
 
 function CheckTask(files, test) {
-    //запускаем test для solution
-    //надо типо куда-то, как-то сохранить, а потом просто консолькой вызвать тесты
-    mkdirp("test/");
+    ssh.connect(
+        {
+            host: "localhost",
+            username: "steel",
+            privateKey: "C:\\temp\\key"
+        }
+    );
+
+    var dir = "/home/steel/test/";
+    mkdirp("C:/test/");
     for(var f in files)
     {
-        fs.writeFile("test/" + files[f].name, files[f].body);
+        fs.writeFile("C:/test/" + files[f].name, files[f].body);
     }
 
     for(var t in files)
     {
-        fs.writeFile("test/" + test[t].name, test[t].body);
+        fs.writeFile("C:/test/" + test[t].name, test[t].body);
     }
-    cmd.run("cd test");
-    cmd.get("npm init", function (data) {
-        console.log(data);
+    ssh.putDirectory("C:/test", dir);
+
+    ssh.execCommand("npm mocha", { cwd: dir },
+        function(result){
+        //Обрабатываем результат проверки
+        console.log(result);
     });
 }
 

@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/JSChecker/JSChecker-TestService/issues"
   },
-  "homepage": "https://github.com/JSChecker/JSChecker-TestService#readme"
+  "homepage": "https://github.com/JSChecker/JSChecker-TestService#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "mkdirp": "^0.5.1",
+    "node-cmd": "^1.2.0",
+    "node-ssh": "^3.1.0"
+  }
 }
