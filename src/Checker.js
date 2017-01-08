@@ -1,38 +1,41 @@
-var fs = require("fs");
-var mkdirp = require('mkdirp');
-var cmd = require('node-cmd');
-var node_ssh = require('node-ssh');
-
-ssh = new node_ssh();
+var SSH = require('simple-ssh');
 
 
 function CheckTask(files, test) {
-    ssh.connect(
+    var dir = "/home/pi/test/";
+
+    var ssh = new SSH(
         {
-            host: "localhost",
-            username: "steel",
-            privateKey: "C:\\temp\\key"
+            host: "192.168.1.106",
+            user: "pi",
+            pass: "12345678",
+            baseDir: dir
         }
     );
 
-    var dir = "/home/steel/test/";
-    mkdirp("C:/test/");
+    console.log("Запись");
     for(var f in files)
     {
-        fs.writeFile("C:/test/" + files[f].name, files[f].body);
+        ssh.exec("cat > " + dir + files[f].name, { in: files[f].body}).start();
     }
 
-    for(var t in files)
+    for(var t in test)
     {
-        fs.writeFile("C:/test/" + test[t].name, test[t].body);
+        ssh.exec("cat > " + dir + "test/" + test[t].name, { in: test[t].body}).start();
     }
-    ssh.putDirectory("C:/test", dir);
 
-    ssh.execCommand("npm mocha", { cwd: dir },
-        function(result){
-        //Обрабатываем результат проверки
-        console.log(result);
-    });
+    console.log("Запускаем тесты");
+    ssh.exec("npm test", {
+        exit: function (code, output, errput) {
+            console.log("OUT:");
+            console.log(output);
+
+            console.log("ERR:");
+            console.log(errput);
+        }
+    })
+        .start();
+
 }
 
 module.exports.CheckTask = CheckTask;
